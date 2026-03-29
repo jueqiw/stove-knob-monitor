@@ -32,10 +32,47 @@ python3 main.py --once   # single check (for testing)
 
 ## Configuration
 
-See `config.example.yaml` — you need:
-- **Tapo camera** RTSP credentials (set in Tapo App → Advanced Settings → Camera Account)
-- **Groq API key** (free at https://console.groq.com/)
-- **Gmail app password** for email alerts (https://myaccount.google.com/apppasswords)
+Copy the example config and fill in your credentials:
+
+```bash
+cp config.example.yaml config.yaml
+```
+
+### Tapo Camera (RTSP)
+
+1. Open Tapo App → tap your camera → gear icon → **Advanced Settings** → **Camera Account**
+2. Create a username and password
+3. Find your camera's IP address in the Tapo App (Settings → Device Info)
+4. Fill in `config.yaml`:
+   ```yaml
+   camera:
+     ip: "192.168.1.xxx"
+     username: "your-camera-username"
+     password: "your-camera-password"
+   ```
+
+### Groq API Key (free)
+
+1. Go to https://console.groq.com/ and sign up (Google account works)
+2. Go to **API Keys** → **Create API Key**
+3. Copy the key and add to `config.yaml`:
+   ```yaml
+   groq:
+     api_key: "gsk_your_key_here"
+   ```
+
+### Gmail Email Alerts
+
+1. Go to https://myaccount.google.com/security and enable **2-Step Verification**
+2. Go to https://myaccount.google.com/apppasswords
+3. Create an app password (name it `stove-monitor`)
+4. Copy the 16-character code and add to `config.yaml`:
+   ```yaml
+   alert:
+     email_to: "recipient@gmail.com"
+     email_from: "sender@gmail.com"
+     app_password: "xxxx xxxx xxxx xxxx"
+   ```
 
 ## Calibration
 
