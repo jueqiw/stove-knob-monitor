@@ -94,29 +94,13 @@ cv2.imwrite('empty_stove_ref.jpg', frame[500:850, 780:1450])
 
 ### Configuration
 
-Edit `config.yaml`:
+Copy the example config and fill in your credentials:
 
-```yaml
-camera:
-  ip: "192.168.1.155"
-  username: "your-camera-username"
-  password: "your-camera-password"
-  port: 554
-  stream: "stream1"
-
-alert:
-  email_to: "recipient@gmail.com"
-  email_from: "sender@gmail.com"
-  smtp_server: "smtp.gmail.com"
-  smtp_port: 587
-  app_password: ""  # Gmail app password
-  cooldown_seconds: 300
-
-groq:
-  api_key: "your-groq-api-key"
-  base_url: "https://api.groq.com/openai/v1"
-  model: "meta-llama/llama-4-scout-17b-16e-instruct"
+```bash
+cp config.example.yaml config.yaml
 ```
+
+Then edit `config.yaml` with your camera IP, credentials, email, and API key. See `config.example.yaml` for the format.
 
 ### Gmail App Password
 

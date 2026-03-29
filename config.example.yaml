@@ -1,0 +1,19 @@
+camera:
+  ip: "YOUR_CAMERA_IP"
+  username: "YOUR_CAMERA_USERNAME"
+  password: "YOUR_CAMERA_PASSWORD"
+  port: 554
+  stream: "stream1"
+
+alert:
+  email_to: "recipient@gmail.com"
+  email_from: "sender@gmail.com"
+  smtp_server: "smtp.gmail.com"
+  smtp_port: 587
+  app_password: "YOUR_GMAIL_APP_PASSWORD"
+  cooldown_seconds: 300
+
+groq:
+  api_key: "YOUR_GROQ_API_KEY"
+  base_url: "https://api.groq.com/openai/v1"
+  model: "meta-llama/llama-4-scout-17b-16e-instruct"

@@ -1,5 +1,8 @@
 config.yaml
 snapshot.jpg
+alert_snapshot.jpg
+monitor.log
+empty_stove_ref.jpg
 __pycache__/
 *.pyc
 calibration_data.json
