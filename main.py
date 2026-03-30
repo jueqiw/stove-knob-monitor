@@ -15,7 +15,7 @@ import yaml
 
 from alert import AlertManager
 from knob_detector import detect_knob_states, draw_knob_states
-from pot_detector import detect_pots, any_pot_present
+from pot_detector import detect_pots, any_pot_present, person_present
 
 logging.basicConfig(
     level=logging.INFO,
@@ -48,6 +48,7 @@ def grab_frame(source):
 POT_CHECK_INTERVAL = 3600  # seconds — check pots via API every 1 hour
 _last_pot_check: float = 0
 _last_pot_result: bool = False  # True if pot was present last check
+_last_person_result: bool = False  # True if person was detected last check
 _burner_was_off: bool = True  # Track if burners were previously all OFF
 
 
@@ -59,9 +60,35 @@ def check_stove(frame, config: dict, alert_mgr: AlertManager) -> None:
       - Immediately when a burner first turns ON
       - Then every POT_CHECK_INTERVAL (1 hour) while burner stays ON
     """
-    global _last_pot_check, _last_pot_result, _burner_was_off
+    global _last_pot_check, _last_pot_result, _burner_was_off, _last_person_result
 
-    # Step 1: Check knob states (local, fast)
+    now = time.time()
+    time_since_last_check = now - _last_pot_check
+    need_api_check = _burner_was_off or time_since_last_check >= POT_CHECK_INTERVAL
+
+    # Step 1: Groq API check — person + pot (once at start, then every 1 hour)
+    if need_api_check:
+        try:
+            result = detect_pots(frame, config)
+            _last_person_result = person_present(result)
+            _last_pot_result = any_pot_present(result)
+            _last_pot_check = now
+            logger.info("Groq check: person=%s, pot=%s",
+                        _last_person_result, _last_pot_result)
+        except Exception as e:
+            logger.error("Groq check failed: %s", e)
+            _last_person_result = False
+            _last_pot_result = False
+    else:
+        remaining = POT_CHECK_INTERVAL - time_since_last_check
+        logger.info("Using cached Groq result (next check in %.0f min)", remaining / 60)
+
+    # Step 2: If person detected → safe, skip everything
+    if _last_person_result:
+        logger.info("Person in kitchen — no action needed.")
+        return
+
+    # Step 3: Check knob states (local, fast, every cycle)
     knob_states = detect_knob_states(frame)
     on_knobs = [s["name"] for s in knob_states if s["is_on"]]
 
@@ -71,31 +98,9 @@ def check_stove(frame, config: dict, alert_mgr: AlertManager) -> None:
         return
 
     logger.info("Burners ON: %s", ", ".join(on_knobs))
-
-    # Step 2: Decide if we need to call the pot detection API
-    now = time.time()
-    just_turned_on = _burner_was_off
-    time_since_last_check = now - _last_pot_check
-    need_pot_check = just_turned_on or time_since_last_check >= POT_CHECK_INTERVAL
-
     _burner_was_off = False
 
-    if need_pot_check:
-        try:
-            pot_result = detect_pots(frame, config)
-            _last_pot_result = any_pot_present(pot_result)
-            _last_pot_check = now
-            reason = "burner just turned ON" if just_turned_on else "hourly check"
-            logger.info("Pot check (%s): %s", reason,
-                        "pot detected" if _last_pot_result else "NO pot")
-        except Exception as e:
-            logger.error("Pot detection failed: %s", e)
-            _last_pot_result = False
-    else:
-        remaining = POT_CHECK_INTERVAL - time_since_last_check
-        logger.info("Using cached pot result (next check in %.0f min)", remaining / 60)
-
-    # Step 3: Alert if burner ON and no pot
+    # Step 4: Alert if burner ON and no pot
     if not _last_pot_result:
         message = f"DANGER: {', '.join(on_knobs)} ON but no pot/pan detected on stove!"
         alert_mgr.send_alert(frame, message)

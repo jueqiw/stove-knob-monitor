@@ -20,15 +20,18 @@ STOVE_TOP_REGION = (780, 500, 1450, 850)  # x1, y1, x2, y2
 
 EMPTY_STOVE_REF = "empty_stove_ref.jpg"
 
-PROMPT = """I'm showing you two images of a kitchen stove top from a security camera.
+PROMPT = """I'm showing you two images of a kitchen from a security camera.
 
 Image 1: REFERENCE — this is the stove when it's EMPTY (no pots/pans).
-Image 2: CURRENT — this is the stove right now.
+Image 2: CURRENT — this is the kitchen right now.
 
-Compare them and tell me: is there a pot, pan, or any cookware on any burner in the CURRENT image that was NOT in the REFERENCE image?
+Tell me:
+1. Is there a person visible in the CURRENT image?
+2. Is there a pot, pan, or any cookware on any burner that was NOT in the REFERENCE image?
 
 Respond in JSON format only, no other text:
 {
+  "person_present": true/false,
   "burners": [
     {"position": "front-left", "has_pot": true/false, "description": "brief description"}
   ]
@@ -47,11 +50,13 @@ def _encode_image(img) -> str:
 
 
 def _get_images(frame) -> tuple:
-    """Return (reference_b64, current_b64) for the stove top."""
-    x1, y1, x2, y2 = STOVE_TOP_REGION
-    current = frame[y1:y2, x1:x2]
+    """Return (reference_b64, current_b64).
+
+    Reference is the empty stove crop. Current is the full frame
+    so Groq can detect both people and pots.
+    """
     ref = cv2.imread(EMPTY_STOVE_REF)
-    return _encode_image(ref), _encode_image(current)
+    return _encode_image(ref), _encode_image(frame)
 
 
 def _make_openai_messages(ref_b64: str, cur_b64: str) -> list:
@@ -154,6 +159,11 @@ def detect_pots(frame, config: Optional[dict] = None) -> dict:
 def any_pot_present(result: dict) -> bool:
     """Check if any burner has a pot/pan."""
     return any(b.get("has_pot", False) for b in result.get("burners", []))
+
+
+def person_present(result: dict) -> bool:
+    """Check if a person is visible."""
+    return result.get("person_present", False)
 
 
 if __name__ == "__main__":
