@@ -30,7 +30,7 @@ SURROUND_RADIUS = 12  # larger region around the dot (knob surface)
 
 # The dot must be this much brighter than the surrounding knob surface.
 # This is RELATIVE so it works regardless of lighting conditions.
-BRIGHTNESS_DIFF_THRESHOLD = 30
+BRIGHTNESS_DIFF_THRESHOLD = 20
 
 
 def _check_dot_present(
