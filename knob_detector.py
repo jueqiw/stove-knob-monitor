@@ -17,11 +17,11 @@ logger = logging.getLogger(__name__)
 # Each entry: knob name, knob center (cx, cy), dot position when OFF (dx, dy)
 # All coordinates in full frame pixel space (2304x1296).
 KNOBS = [
-    {"name": "Knob 1", "cx": 1043, "cy": 558, "dot_x": 1038, "dot_y": 566},
-    {"name": "Knob 2", "cx": 1077, "cy": 554, "dot_x": 1072, "dot_y": 562},
-    {"name": "Knob 3", "cx": 1298, "cy": 548, "dot_x": 1289, "dot_y": 549},
-    {"name": "Knob 4", "cx": 1335, "cy": 540, "dot_x": 1327, "dot_y": 551},
-    {"name": "Knob 5", "cx": 1373, "cy": 541, "dot_x": 1365, "dot_y": 551},
+    {"name": "Knob 1", "cx": 1043, "cy": 558, "dot_x": 1039, "dot_y": 565},
+    {"name": "Knob 2", "cx": 1077, "cy": 554, "dot_x": 1073, "dot_y": 561},
+    {"name": "Knob 3", "cx": 1298, "cy": 548, "dot_x": 1291, "dot_y": 548},
+    {"name": "Knob 4", "cx": 1335, "cy": 540, "dot_x": 1328, "dot_y": 550},
+    {"name": "Knob 5", "cx": 1373, "cy": 541, "dot_x": 1367, "dot_y": 552},
 ]
 
 # The dot sticker is ~3-5 pixels across.
@@ -30,7 +30,7 @@ SURROUND_RADIUS = 12  # larger region around the dot (knob surface)
 
 # The dot must be this much brighter than the surrounding knob surface.
 # This is RELATIVE so it works regardless of lighting conditions.
-BRIGHTNESS_DIFF_THRESHOLD = 20
+BRIGHTNESS_DIFF_THRESHOLD = 30
 
 
 def _check_dot_present(
